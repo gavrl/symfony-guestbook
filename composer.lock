@@ -2568,6 +2568,7 @@
     ],
     "packages-dev": [
         {
+<<<<<<< HEAD
             "name": "symfony/debug-bundle",
             "version": "v5.0.11",
             "source": {
@@ -2651,6 +2652,8 @@
             "time": "2020-05-20T17:38:26+00:00"
         },
         {
+=======
+>>>>>>> b0478302bebe93cd0c1121a2269096cb1c1336bc
             "name": "symfony/stopwatch",
             "version": "v5.0.11",
             "source": {
