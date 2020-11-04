@@ -12,30 +12,32 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Conference
 {
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $city;
+    private ?string $city;
 
     /**
      * @ORM\Column(type="string", length=4)
      */
-    private $year;
+    private ?string $year;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    private $isInternational;
+    private ?bool $isInternational;
 
     /**
-     * @ORM\OneToMany(targetEntity=Comment::class, mappedBy="conference", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Comment::class, mappedBy="conference",
+     *                                             orphanRemoval=true)
      */
     private $comments;
 
@@ -46,7 +48,7 @@ class Conference
 
     public function __toString(): string
     {
-        return $this->city.' '.$this->year;
+        return $this->city . ' ' . $this->year;
     }
 
     public function getId(): ?int
@@ -119,4 +121,5 @@ class Conference
 
         return $this;
     }
+
 }
