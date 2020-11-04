@@ -19,33 +19,47 @@ class ConferenceController extends AbstractController
     private Environment $twig;
 
     /**
+     * @var ConferenceRepository
+     */
+    private ConferenceRepository $conferenceRepository;
+
+    /**
+     * @var CommentRepository
+     */
+    private CommentRepository $commentRepository;
+
+    /**
      * ConferenceController constructor.
      *
-     * @param  Environment  $twig
+     * @param  Environment           $twig
+     * @param  ConferenceRepository  $conferenceRepository
+     * @param  CommentRepository     $commentRepository
      */
-    public function __construct(Environment $twig)
-    {
-        $this->twig = $twig;
+    public function __construct(
+      Environment $twig,
+      ConferenceRepository $conferenceRepository,
+      CommentRepository $commentRepository
+    ) {
+        $this->twig                 = $twig;
+        $this->conferenceRepository = $conferenceRepository;
+        $this->commentRepository    = $commentRepository;
     }
 
     /**
      * @Route("/", name="homepage")
-     *
-     * @param  ConferenceRepository  $conferenceRepository
      *
      * @return Response
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
      */
-    public function index(
-      ConferenceRepository $conferenceRepository
-    ): Response {
+    public function index(): Response
+    {
         return new Response(
           $this->twig->render(
             'conference/index.html.twig',
             [
-              'conferences' => $conferenceRepository->findAll(),
+              'conferences' => $this->conferenceRepository->findAll(),
             ]
           )
         );
@@ -54,9 +68,8 @@ class ConferenceController extends AbstractController
     /**
      * @Route("/conference/{id}", name="conference")
      *
-     * @param  Request            $request
-     * @param  Conference         $conference
-     * @param  CommentRepository  $commentRepository
+     * @param  Request     $request
+     * @param  Conference  $conference
      *
      * @return Response
      * @throws LoaderError
@@ -65,11 +78,10 @@ class ConferenceController extends AbstractController
      */
     public function show(
       Request $request,
-      Conference $conference,
-      CommentRepository $commentRepository
+      Conference $conference
     ): Response {
         $offset    = max(0, $request->query->getInt('offset', 0));
-        $paginator = $commentRepository->getCommentPaginator(
+        $paginator = $this->commentRepository->getCommentPaginator(
           $conference,
           $offset
         );
@@ -80,10 +92,11 @@ class ConferenceController extends AbstractController
           $this->twig->render(
             'conference/show.html.twig',
             [
-              'conference' => $conference,
-              'comments'   => $paginator,
-              'previous'   => $offset - CommentRepository::PAGINATOR_PER_PAGE,
-              'next'       => min(
+              'conferences' => $this->conferenceRepository->findAll(),
+              'conference'  => $conference,
+              'comments'    => $paginator,
+              'previous'    => $offset - CommentRepository::PAGINATOR_PER_PAGE,
+              'next'        => min(
                 count($paginator),
                 $offset + CommentRepository::PAGINATOR_PER_PAGE
               ),
