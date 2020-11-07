@@ -9,7 +9,7 @@
         <div>There are {{ comments|length }} comments.</div>
         {% for comment in comments %}
             {% if comment.photofilename %}
-                <img src="{{ asset('uploads/photos/' ~ comment.photofilename) }}"/>
+                <img src="{{ asset('uploads/photos/' ~ comment.photofilename) }}" alt=""/>
             {% endif %}
 
             <h4>{{ comment.author }}</h4>
@@ -29,4 +29,8 @@
     {% else %}
         <div>No comments have been posted yet for this conference.</div>
     {% endif %}
+
+    <h2>Add your own feedback</h2>
+
+    {{ form(comment_form) }}
 {% endblock %}
