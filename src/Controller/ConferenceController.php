@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Conference;
 use App\Repository\{CommentRepository, ConferenceRepository};
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Component\Routing\Annotation\Route;
@@ -31,18 +32,18 @@ class ConferenceController extends AbstractController
     /**
      * ConferenceController constructor.
      *
-     * @param  Environment           $twig
-     * @param  ConferenceRepository  $conferenceRepository
-     * @param  CommentRepository     $commentRepository
+     * @param Environment          $twig
+     * @param ConferenceRepository $conferenceRepository
+     * @param CommentRepository    $commentRepository
      */
     public function __construct(
-      Environment $twig,
-      ConferenceRepository $conferenceRepository,
-      CommentRepository $commentRepository
+        Environment $twig,
+        ConferenceRepository $conferenceRepository,
+        CommentRepository $commentRepository
     ) {
-        $this->twig                 = $twig;
+        $this->twig = $twig;
         $this->conferenceRepository = $conferenceRepository;
-        $this->commentRepository    = $commentRepository;
+        $this->commentRepository = $commentRepository;
     }
 
     /**
@@ -55,21 +56,23 @@ class ConferenceController extends AbstractController
      */
     public function index(): Response
     {
+        dump($this->changeTheSwitches([2, 0]));
         return new Response(
-          $this->twig->render(
-            'conference/index.html.twig',
-            [
-              'conferences' => $this->conferenceRepository->findAll(),
-            ]
-          )
+            $this->twig->render(
+                'conference/index.html.twig',
+                [
+                    'conferences' => $this->conferenceRepository->findAll(),
+                ]
+            )
         );
     }
+
 
     /**
      * @Route("/conference/{id}", name="conference")
      *
-     * @param  Request     $request
-     * @param  Conference  $conference
+     * @param Request    $request
+     * @param Conference $conference
      *
      * @return Response
      * @throws LoaderError
@@ -77,32 +80,47 @@ class ConferenceController extends AbstractController
      * @throws SyntaxError
      */
     public function show(
-      Request $request,
-      Conference $conference
+        Request $request,
+        Conference $conference
     ): Response {
-        $offset    = max(0, $request->query->getInt('offset', 0));
+        $offset = max(0, $request->query->getInt('offset', 0));
         $paginator = $this->commentRepository->getCommentPaginator(
-          $conference,
-          $offset
+            $conference,
+            $offset
         );
-
-        dump($offset);
 
         return new Response(
-          $this->twig->render(
-            'conference/show.html.twig',
-            [
-              'conferences' => $this->conferenceRepository->findAll(),
-              'conference'  => $conference,
-              'comments'    => $paginator,
-              'previous'    => $offset - CommentRepository::PAGINATOR_PER_PAGE,
-              'next'        => min(
-                count($paginator),
-                $offset + CommentRepository::PAGINATOR_PER_PAGE
-              ),
-            ]
-          )
+            $this->twig->render(
+                'conference/show.html.twig',
+                [
+                    'conferences' => $this->conferenceRepository->findAll(),
+                    'conference'  => $conference,
+                    'comments'    => $paginator,
+                    'previous'    => $offset
+                        - CommentRepository::PAGINATOR_PER_PAGE,
+                    'next'        => min(
+                        count($paginator),
+                        $offset + CommentRepository::PAGINATOR_PER_PAGE
+                    ),
+                ]
+            )
         );
+    }
+
+    public function changeTheSwitches(array $switches): int
+    {
+        $sum1 = 0;
+        $sum2 = 0;
+        foreach ($switches as $k => $switch) {
+            if ($k % 2 == 0) {
+                $sum1 += $switch;
+            } else {
+                $sum2 += $switch;
+            }
+        }
+        return $sum1 >= $sum2
+            ? $sum1
+            : $sum2;
     }
 
 }
