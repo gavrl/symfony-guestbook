@@ -2,15 +2,22 @@
 
 namespace App\Controller;
 
+use App\Utils\SpamChecker;
 use App\Entity\{Comment, Conference};
 use App\Form\CommentFormType;
 use App\Repository\{CommentRepository, ConferenceRepository};
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\{File\File, Request, Response};
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\HttpClient\Exception\{ClientExceptionInterface,
+    RedirectionExceptionInterface,
+    ServerExceptionInterface,
+    TransportExceptionInterface
+};
 use Twig\Environment;
 use Twig\Error\{LoaderError, RuntimeError, SyntaxError};
 
@@ -81,17 +88,23 @@ class ConferenceController extends AbstractController
      *
      * @param Request $request
      * @param Conference $conference
+     * @param SpamChecker $spamChecker
+     * @param string
      *
-     * @param string $photoDir
      * @return Response
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      * @throws Exception
      */
     public function show(
         Request $request,
         Conference $conference,
+        SpamChecker $spamChecker,
         string $photoDir
     ): Response
     {
@@ -102,7 +115,7 @@ class ConferenceController extends AbstractController
             $comment->setConference($conference);
             /** @var File $photo */
             if ($photo = $form->get('photo')->getData()) {
-                $filename = bin2hex(random_bytes(6)).'.'.$photo->guessExtension();
+                $filename = bin2hex(random_bytes(6)) . '.' . $photo->guessExtension();
                 try {
                     $photo->move($photoDir, $filename);
                 } catch (FileException $e) {
@@ -111,6 +124,17 @@ class ConferenceController extends AbstractController
                 $comment->setPhotoFilename($filename);
             }
             $this->entityManager->persist($comment);
+
+            $context = [
+                'user_ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('user-agent'),
+                'referrer' => $request->headers->get('referer'),
+                'permalink' => $request->getUri(),
+            ];
+            if (2 === $spamChecker->getSpamScore($comment, $context)) {
+                throw new RuntimeException('Blatant spam, go away!');
+            }
+
             $this->entityManager->flush();
 
             return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
