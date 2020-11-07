@@ -6,7 +6,7 @@ use App\Entity\Comment;
 use App\Entity\Conference;
 use App\Form\CommentFormType;
 use App\Repository\{CommentRepository, ConferenceRepository};
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Component\Routing\Annotation\Route;
@@ -32,20 +32,29 @@ class ConferenceController extends AbstractController
     private CommentRepository $commentRepository;
 
     /**
+     * @var EntityManagerInterface
+     */
+    private EntityManagerInterface $entityManager;
+
+    /**
      * ConferenceController constructor.
      *
-     * @param Environment          $twig
+     * @param Environment $twig
      * @param ConferenceRepository $conferenceRepository
-     * @param CommentRepository    $commentRepository
+     * @param CommentRepository $commentRepository
+     * @param EntityManagerInterface $entityManager
      */
     public function __construct(
         Environment $twig,
         ConferenceRepository $conferenceRepository,
-        CommentRepository $commentRepository
-    ) {
+        CommentRepository $commentRepository,
+        EntityManagerInterface $entityManager
+    )
+    {
         $this->twig = $twig;
         $this->conferenceRepository = $conferenceRepository;
         $this->commentRepository = $commentRepository;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -69,7 +78,7 @@ class ConferenceController extends AbstractController
     /**
      * @Route("/conference/{slug}", name="conference")
      *
-     * @param Request    $request
+     * @param Request $request
      * @param Conference $conference
      *
      * @return Response
@@ -80,9 +89,19 @@ class ConferenceController extends AbstractController
     public function show(
         Request $request,
         Conference $conference
-    ): Response {
+    ): Response
+    {
         $comment = new Comment();
         $form = $this->createForm(CommentFormType::class, $comment);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment->setConference($conference);
+            $this->entityManager->persist($comment);
+            $this->entityManager->flush();
+
+            return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
+        }
+
 
         $offset = max(0, $request->query->getInt('offset', 0));
         $paginator = $this->commentRepository->getCommentPaginator(
@@ -94,11 +113,11 @@ class ConferenceController extends AbstractController
             $this->twig->render(
                 'conference/show.html.twig',
                 [
-                    'conference'   => $conference,
-                    'comments'     => $paginator,
-                    'previous'     => $offset
+                    'conference' => $conference,
+                    'comments' => $paginator,
+                    'previous' => $offset
                         - CommentRepository::PAGINATOR_PER_PAGE,
-                    'next'         => min(
+                    'next' => min(
                         count($paginator),
                         $offset + CommentRepository::PAGINATOR_PER_PAGE
                     ),
