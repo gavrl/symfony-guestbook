@@ -141,6 +141,9 @@ class Conference
         return $this;
     }
 
+    /**
+     * @param SluggerInterface $slugger
+     */
     public function computeSlug(SluggerInterface $slugger)
     {
         if (!$this->slug || '-' === $this->slug) {

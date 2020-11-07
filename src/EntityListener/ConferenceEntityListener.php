@@ -26,7 +26,9 @@ class ConferenceEntityListener
         $conference->computeSlug($this->slugger);
     }
 
-    public function preUpdate(Conference $conference, LifecycleEventArgs $event)
+    public function preUpdate(
+        Conference $conference,
+        LifecycleEventArgs $event)
     {
         $conference->computeSlug($this->slugger);
     }

@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Conference;
 use App\Repository\{CommentRepository, ConferenceRepository};
-use DateTime;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Component\Routing\Annotation\Route;
@@ -56,20 +56,16 @@ class ConferenceController extends AbstractController
      */
     public function index(): Response
     {
-        dump($this->changeTheSwitches([2, 0]));
         return new Response(
             $this->twig->render(
-                'conference/index.html.twig',
-                [
-                    'conferences' => $this->conferenceRepository->findAll(),
-                ]
+                'conference/index.html.twig'
             )
         );
     }
 
 
     /**
-     * @Route("/conference/{id}", name="conference")
+     * @Route("/conference/{slug}", name="conference")
      *
      * @param Request    $request
      * @param Conference $conference
@@ -93,7 +89,6 @@ class ConferenceController extends AbstractController
             $this->twig->render(
                 'conference/show.html.twig',
                 [
-                    'conferences' => $this->conferenceRepository->findAll(),
                     'conference'  => $conference,
                     'comments'    => $paginator,
                     'previous'    => $offset
@@ -105,22 +100,6 @@ class ConferenceController extends AbstractController
                 ]
             )
         );
-    }
-
-    public function changeTheSwitches(array $switches): int
-    {
-        $sum1 = 0;
-        $sum2 = 0;
-        foreach ($switches as $k => $switch) {
-            if ($k % 2 == 0) {
-                $sum1 += $switch;
-            } else {
-                $sum2 += $switch;
-            }
-        }
-        return $sum1 >= $sum2
-            ? $sum1
-            : $sum2;
     }
 
 }
