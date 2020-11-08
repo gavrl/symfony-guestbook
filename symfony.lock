@@ -2,6 +2,18 @@
     "composer/package-versions-deprecated": {
         "version": "1.11.99"
     },
+    "dama/doctrine-test-bundle": {
+        "version": "4.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "4.0",
+            "ref": "56eaa387b5e48ebcc7c95a893b47dfa1ad51449c"
+        },
+        "files": [
+            "./config/packages/test/dama_doctrine_test_bundle.yaml"
+        ]
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
@@ -138,6 +150,9 @@
     },
     "php": {
         "version": "7.4"
+    },
+    "php-webdriver/webdriver": {
+        "version": "1.8.3"
     },
     "phpdocumentor/reflection-common": {
         "version": "2.2.0"
@@ -421,6 +436,9 @@
     "symfony/orm-pack": {
         "version": "v2.0.0"
     },
+    "symfony/panther": {
+        "version": "v0.8.0"
+    },
     "symfony/polyfill-intl-grapheme": {
         "version": "v1.20.0"
     },
@@ -441,6 +459,9 @@
     },
     "symfony/polyfill-php80": {
         "version": "v1.20.0"
+    },
+    "symfony/process": {
+        "version": "v5.0.11"
     },
     "symfony/profiler-pack": {
         "version": "v1.0.5"
