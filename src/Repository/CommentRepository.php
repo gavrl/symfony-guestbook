@@ -30,7 +30,7 @@ class CommentRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('comment')
             ->andWhere('comment.conference = :conference')
-            ->andWhere('c.state = :state')
+            ->andWhere('comment.state = :state')
             ->setParameters([
                 'conference' => $conference,
                 'state' => 'published'

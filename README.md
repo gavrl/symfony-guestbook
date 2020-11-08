@@ -109,12 +109,19 @@ Create dump<br/>
 ``
 symfony run pg_dump --data-only > dump.sql
 ``
+<br/>
+``
+docker-compose exec database pg_dump --data-only > dump.sql
+``
 
 Restore dump<br/>
 ``
 symfony run psql < dump.sql
 ``
-
+<br/>
+``
+docker-compose exec database psql < dump.sql
+``
 ## Tests
 ``
 symfony run bin/phpunit
