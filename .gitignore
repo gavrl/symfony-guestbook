@@ -10,6 +10,7 @@
 ./composer.lock
 /.idea
 /public/uploads
+/bin/phpunit
 ###< symfony/framework-bundle ###
 
 ###> phpunit/phpunit ###
