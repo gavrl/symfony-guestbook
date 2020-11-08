@@ -4,6 +4,7 @@ type: php:7.4
 
 runtime:
     extensions:
+        - amqp
         - redis
         - apcu
         - mbstring
@@ -25,6 +26,7 @@ disk: 512
 relationships:
     database: "db:postgresql"
     redis: "rediscache:redis"
+    rabbitmq: "queue:rabbitmq"
 
 web:
     locations:
