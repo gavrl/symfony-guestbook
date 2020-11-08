@@ -11,7 +11,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Comment|null find($id, $lockMode = null, $lockVersion = null)
  * @method Comment|null findOneBy(array $criteria, array $orderBy = null)
  * @method Comment[]    findAll()
- * @method Comment[]    findBy(array $criteria, array $orderBy = null, $limit =null, $offset = null)
+ * @method Comment[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class CommentRepository extends ServiceEntityRepository
 {
@@ -24,16 +24,21 @@ class CommentRepository extends ServiceEntityRepository
     }
 
     public function getCommentPaginator(
-      Conference $conference,
-      int $offset
-    ): Paginator {
+        Conference $conference,
+        int $offset
+    ): Paginator
+    {
         $query = $this->createQueryBuilder('comment')
-                      ->andWhere('comment.conference = :conference')
-                      ->setParameter('conference', $conference)
-                      ->orderBy('comment.createdAt', 'DESC')
-                      ->setMaxResults(self::PAGINATOR_PER_PAGE)
-                      ->setFirstResult($offset)
-                      ->getQuery();
+            ->andWhere('comment.conference = :conference')
+            ->andWhere('c.state = :state')
+            ->setParameters([
+                'conference' => $conference,
+                'state' => 'published'
+            ])
+            ->orderBy('comment.createdAt', 'DESC')
+            ->setMaxResults(self::PAGINATOR_PER_PAGE)
+            ->setFirstResult($offset)
+            ->getQuery();
 
         return new Paginator($query);
     }
