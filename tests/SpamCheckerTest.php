@@ -27,7 +27,8 @@ class SpamCheckerTest extends TestCase
         $comment = (new Comment())
             ->setAuthor('SErg')
             ->setEmail('mmm')
-            ->setText('sdsd');
+            ->setText('sdsd')
+            ->setState('published');
         $comment->setCreatedAtValue();
         $context = [];
 
@@ -69,7 +70,8 @@ class SpamCheckerTest extends TestCase
         $comment = (new Comment())
             ->setAuthor('SErg')
             ->setEmail('mmm')
-            ->setText('sdsd');
+            ->setText('sdsd')
+            ->setState('published');
         $comment->setCreatedAtValue();
         $context = [];
 
