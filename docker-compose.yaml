@@ -3,10 +3,15 @@ version: '3'
 services:
   database:
     image: postgres:11-alpine
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+      - ./postgres/dump:/dump
     environment:
       POSTGRES_USER: main
       POSTGRES_PASSWORD: main
       POSTGRES_DB: main
+      TZ: ${WORKSPACE_TIMEZONE}
+      PGDATA: /var/lib/postgresql/data/pgdata/
     ports: [ 54321:5432 ]
 
   redis:

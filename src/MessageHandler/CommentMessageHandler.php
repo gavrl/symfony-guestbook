@@ -7,6 +7,9 @@ use App\Repository\CommentRepository;
 use App\Utils\SpamChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Bridge\Twig\Mime\NotificationEmail;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface as MailerTransportExceptionInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Contracts\HttpClient\Exception\{ClientExceptionInterface,
     RedirectionExceptionInterface,
@@ -36,12 +39,20 @@ class CommentMessageHandler implements MessageHandlerInterface
     /** @var WorkflowInterface */
     private WorkflowInterface $workflow;
 
+    /** @var MailerInterface */
+    private MailerInterface $mailer;
+
+    /** @var string */
+    private string $adminEmail;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         SpamChecker $spamChecker,
         CommentRepository $commentRepository,
         MessageBusInterface $bus,
         WorkflowInterface $commentStateMachine,
+        MailerInterface $mailer,
+        string $adminEmail,
         LoggerInterface $logger = null
     ) {
         $this->entityManager = $entityManager;
@@ -49,6 +60,8 @@ class CommentMessageHandler implements MessageHandlerInterface
         $this->commentRepository = $commentRepository;
         $this->bus = $bus;
         $this->workflow = $commentStateMachine;
+        $this->mailer = $mailer;
+        $this->adminEmail = $adminEmail;
         $this->logger = $logger;
     }
 
@@ -58,6 +71,7 @@ class CommentMessageHandler implements MessageHandlerInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws MailerTransportExceptionInterface
      */
     public function __invoke(CommentMessage $message)
     {
@@ -68,6 +82,7 @@ class CommentMessageHandler implements MessageHandlerInterface
 
         if ($this->workflow->can($comment, 'accept')) {
             $score = $this->spamChecker->getSpamScore($comment, $message->getContext());
+            dump($score);
             $transition = 'accept';
             if (2 === $score) {
                 $transition = 'reject_spam';
@@ -82,8 +97,14 @@ class CommentMessageHandler implements MessageHandlerInterface
             $this->workflow->can($comment, 'publish') ||
             $this->workflow->can($comment, 'publish_ham')
         ) {
-            $this->workflow->apply($comment, $this->workflow->can($comment, 'publish') ? 'publish' : 'publish_ham');
-            $this->entityManager->flush();
+            $this->mailer->send(
+                (new NotificationEmail())
+                    ->subject('New comment posted')
+                    ->htmlTemplate('emails/comment_notification.html.twig')
+                    ->from($this->adminEmail)
+                    ->to($this->adminEmail)
+                    ->context(['comment' => $comment])
+            );
         } elseif ($this->logger) {
             $this->logger->debug(
                 'Dropping comment message',
