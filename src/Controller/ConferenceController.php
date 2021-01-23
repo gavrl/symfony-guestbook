@@ -44,8 +44,7 @@ class ConferenceController extends AbstractController
         CommentRepository $commentRepository,
         EntityManagerInterface $entityManager,
         MessageBusInterface $bus
-    )
-    {
+    ) {
         $this->twig = $twig;
         $this->conferenceRepository = $conferenceRepository;
         $this->commentRepository = $commentRepository;
@@ -56,18 +55,25 @@ class ConferenceController extends AbstractController
     /**
      * @Route("/", name="homepage")
      *
+     * @param ConferenceRepository $conferenceRepository
      * @return Response
      * @throws LoaderError
      * @throws RuntimeError
      * @throws SyntaxError
      */
-    public function index(): Response
+    public function index(ConferenceRepository $conferenceRepository): Response
     {
-        return new Response(
+        $response = new Response(
             $this->twig->render(
-                'conference/index.html.twig'
+                'conference/index.html.twig',
+                [
+                    'conferences' => $conferenceRepository->findAll(),
+                ]
             )
         );
+        $response->setSharedMaxAge(3600);
+
+        return $response;
     }
 
 
@@ -88,8 +94,7 @@ class ConferenceController extends AbstractController
         Request $request,
         Conference $conference,
         string $photoDir
-    ): Response
-    {
+    ): Response {
         $comment = new Comment();
         $form = $this->createForm(CommentFormType::class, $comment);
         $form->handleRequest($request);

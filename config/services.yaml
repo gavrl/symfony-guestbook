@@ -4,8 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-    default_admin_email: admin@example.com
-    default_domain: '127.0.0.1'
+    default_admin_email: sergeygavr.94@yandex.ru
+    default_domain: '192.168.56.101'
     default_scheme: 'http'
 
     router.request_context.host: '%env(default:default_domain:SYMFONY_DEFAULT_ROUTE_HOST)%'
