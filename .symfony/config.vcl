@@ -8,4 +8,11 @@ sub vcl_backend_response {
         unset beresp.http.Surrogate-Control;
         set beresp.do_esi = true;
     }
+
+    if (req.method == "PURGE") {
+        if (req.http.x-purge-token != "PURGE_NOW") {
+            return(synth(405));
+        }
+        return (purge);
+    }
 }
