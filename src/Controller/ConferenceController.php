@@ -76,6 +76,28 @@ class ConferenceController extends AbstractController
         return $response;
     }
 
+    /**
+     * @Route("/conference_header", name="conference_header")
+     * @param ConferenceRepository $conferenceRepository
+     * @return Response
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
+    public function conferenceHeader(ConferenceRepository $conferenceRepository): Response
+    {
+        $response = new Response(
+            $this->twig->render(
+                'conference/header.html.twig',
+                [
+                    'conferences' => $conferenceRepository->findAll(),
+                ]
+            )
+        );
+        $response->setSharedMaxAge(3600);
+
+        return $response;
+    }
 
     /**
      * @Route("/conference/{slug}", name="conference")
