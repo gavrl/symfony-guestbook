@@ -2,15 +2,28 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use App\Repository\CommentRepository;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=CommentRepository::class)
  * @ORM\HasLifecycleCallbacks()
+ *
+ * @ApiResource(
+ *     collectionOperations={"get"={"normalization_context"={"groups"="comment:list"}}},
+ *     itemOperations={"get"={"normalization_context"={"groups"="comment:item"}}},
+ *     order={"createdAt"="DESC"},
+ *     paginationEnabled=false
+ * )
+ *
+ * @ApiFilter(SearchFilter::class, properties={"conference": "exact"})
  */
 class Comment
 {
@@ -19,40 +32,54 @@ class Comment
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     *
+     * @Groups({"comment:list", "comment:item"})
      */
     private ?int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\NotBlank
+     *
+     * @Groups({"comment:list", "comment:item"})
      */
     private ?string $author;
 
     /**
      * @ORM\Column(type="text")
      * @Assert\NotBlank
+     *
+     * @Groups({"comment:list", "comment:item"})
      */
     private ?string $text;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Assert\Email()
+     *
+     * @Groups({"comment:list", "comment:item"})
      */
     private ?string $email;
 
     /**
      * @ORM\Column(type="datetime")
+     *
+     * @Groups({"comment:list", "comment:item"})
      */
     private ?DateTimeInterface $createdAt;
 
     /**
      * @ORM\ManyToOne(targetEntity=Conference::class, inversedBy="comments")
      * @ORM\JoinColumn(nullable=false)
+     *
+     * @Groups({"comment:list", "comment:item"})
      */
     private ?Conference $conference;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     *
+     * @Groups({"comment:list", "comment:item"})
      */
     private ?string $photoFilename;
 
