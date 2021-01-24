@@ -1,3 +1,7 @@
+.PHONY: tests
+
+init: up serve watch consume
+
 up:
 	docker-compose up -d
 
@@ -8,4 +12,11 @@ tests:
 	symfony console doctrine:fixtures:load -n
 	symfony php bin/phpunit
 
-.PHONY: tests
+serve:
+	symfony server:start -d
+
+watch:
+	symfony run -d yarn encore dev --watch
+
+consume:
+	symfony console messenger:consume async -vv
