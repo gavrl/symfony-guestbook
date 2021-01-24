@@ -20,3 +20,6 @@ watch:
 
 consume:
 	symfony console messenger:consume async -vv
+
+cache:
+	php bin/console cache:clear

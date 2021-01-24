@@ -21,6 +21,7 @@
         "symfony/mailer": "5.2.*",
         "symfony/messenger": "5.2.*",
         "symfony/monolog-bundle": "^3.6",
+        "symfony/notifier": "5.2.*",
         "symfony/process": "5.2.*",
         "symfony/security-bundle": "5.2.*",
         "symfony/string": "5.2.*",
